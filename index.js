@@ -2,8 +2,12 @@ import puppeteer, { KnownDevices } from 'puppeteer';
 import chalk from 'chalk';
 import devices from './devices.json' assert { type: "json" };
 
+import fs from 'fs';
+
 import dotenv from 'dotenv';
 dotenv.config();
+
+const forceRebuild = process.argv.includes('-f');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -28,11 +32,17 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     await page.waitForFunction(text => !!Array.from(document.querySelectorAll('button[type="button"]')).find(el => el.textContent === text), {}, "Share");
 
-    console.log(chalk.greenBright(`Warmed up!`));
+    console.log(chalk.bgGreen(`Warmed up!`));
 
     for (let device of devices) {
 
         console.log(chalk.yellowBright(`${device} Starting...`));
+
+        const screenExists = fs.existsSync(`screenshots/${device.replace(/[\W_]+/g, "-")}-main.png`);
+        if (screenExists && !forceRebuild) {
+            console.log(chalk.bgGreen(`${device} Already exists, skipping...`));
+            continue;
+        }
         
         await page.emulate(KnownDevices[device]);
         await page.waitForNetworkIdle();
@@ -85,9 +95,17 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
             path: `screenshots/${device.replace(/[\W_]+/g, "-")}-stats-2.png`
         });
 
+        await page.evaluate(() => document.querySelector('a[href="/en/overview/"]').click());
+
+        await page.evaluate(() => {
+            window.scrollTo(0, 0);
+        });
+
+        await sleep(2000);
+
         console.log(chalk.yellowBright(`${device} 4/4 screenshots taken...`));
 
-        console.log(chalk.greenBright(`${device} Finished!`));
+        console.log(chalk.bgGreen(`${device} completed!`));
 
     }
 
