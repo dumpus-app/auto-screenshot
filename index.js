@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import puppeteer, { KnownDevices } from 'puppeteer';
 import chalk from 'chalk';
 import devices from './devices.json' assert { type: "json" };
 import fs from 'fs';
-import dotenv from 'dotenv/config';
 import { setTimeout } from 'timers/promises';
 
 const forceRebuild = process.argv.includes('-f');
