@@ -1,15 +1,11 @@
+import 'dotenv/config';
 import puppeteer, { KnownDevices } from 'puppeteer';
 import chalk from 'chalk';
 import devices from './devices.json' assert { type: "json" };
-
 import fs from 'fs';
-
-import dotenv from 'dotenv';
-dotenv.config();
+import { setTimeout } from 'timers/promises';
 
 const forceRebuild = process.argv.includes('-f');
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 (async () => {
     
@@ -89,7 +85,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         });
 
         // let scroll and bar disappear 
-        await sleep(2000);
+        await setTimeout(2000);
 
         await page.screenshot({
             path: `screenshots/${device.replace(/[\W_]+/g, "-")}-stats-2.png`
@@ -101,7 +97,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
             window.scrollTo(0, 0);
         });
 
-        await sleep(2000);
+        await setTimeout(2000);
 
         console.log(chalk.yellowBright(`${device} 4/4 screenshots taken...`));
 
